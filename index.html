@@ -34,6 +34,9 @@
             height: calc(33.33vw * 0.8);
             border: 1px solid black;
             position: relative;
+            display: flex;
+            align-items: flex-end; /* Ensure bars grow upwards */
+            justify-content: space-around; /* Space bars evenly */
         }
         .axis {
             position: absolute;
@@ -195,7 +198,7 @@
 
         // Initialize the histogram with default min/max
         window.onload = function() {
-            renderAxes(0, 5);
+            renderAxes(0, 5);  // Render default axes for initial range 0-5
         };
     </script>
 
