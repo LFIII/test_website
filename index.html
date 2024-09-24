@@ -14,14 +14,51 @@
             margin: 5px;
             padding: 10px;
         }
+        #histogram-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 30px;
+        }
         .histogram-bar {
             display: inline-block;
             width: 20px;
             background-color: orange;
             margin: 2px;
+            vertical-align: bottom;
+        }
+        .histogram-bar-container {
+            position: relative;
         }
         #histogram {
-            margin-top: 20px;
+            width: 33.33vw;
+            height: calc(33.33vw * 0.8);
+            border: 1px solid black;
+            position: relative;
+        }
+        .axis {
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            height: 100%;
+        }
+        .x-axis {
+            position: absolute;
+            bottom: -20px;
+            width: 100%;
+            display: flex;
+            justify-content: space-around;
+        }
+        .y-axis {
+            position: absolute;
+            left: -30px;
+            bottom: 0;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
         #counter {
             margin-top: 10px;
@@ -38,20 +75,28 @@
     <h1>Random Integer Generator with Histogram</h1>
     <p>Enter a range to generate a random number:</p>
 
-    <input type="number" id="min" placeholder="Min Value">
-    <input type="number" id="max" placeholder="Max Value">
+    <input type="number" id="min" placeholder="Min Value" value="0">
+    <input type="number" id="max" placeholder="Max Value" value="5">
     <button onclick="generateRandom()">Generate</button>
     <p id="result"></p>
 
     <div id="counter">Generated numbers: 0</div>
 
-    <div id="histogram"></div>
+    <div id="histogram-container">
+        <div id="histogram">
+            <div class="axis">
+                <div class="y-axis" id="y-axis"></div>
+            </div>
+            <div class="x-axis" id="x-axis"></div>
+        </div>
+    </div>
 
     <button onclick="resetHistogram()">Reset Histogram</button>
 
     <script>
         let counts = {};
         let totalGenerated = 0;
+        let max_occurrences = 0;
 
         // Function to generate a random integer within the user-specified range
         function generateRandom() {
@@ -82,10 +127,14 @@
                 for (let i = min; i <= max; i++) {
                     counts[i] = 0;
                 }
+                renderAxes(min, max);
             }
 
             // Increment the count for the generated number
             counts[randomInt]++;
+            if (counts[randomInt] > max_occurrences) {
+                max_occurrences = counts[randomInt];
+            }
             renderHistogram(min, max);
         }
 
@@ -94,13 +143,38 @@
             const histogramDiv = document.getElementById('histogram');
             histogramDiv.innerHTML = ''; // Clear previous histogram
 
+            // Render the y-axis
+            const yAxis = document.createElement('div');
+            yAxis.classList.add('y-axis');
+            const yLabels = document.getElementById('y-axis');
+            yLabels.innerHTML = ''; // Clear y-axis labels
+            for (let i = 0; i <= max_occurrences; i++) {
+                const yLabel = document.createElement('div');
+                yLabel.textContent = i;
+                yLabels.appendChild(yLabel);
+            }
+
+            // Render histogram bars
             for (let i = min; i <= max; i++) {
                 const count = counts[i];
+                const barContainer = document.createElement('div');
+                barContainer.classList.add('histogram-bar-container');
                 const bar = document.createElement('div');
                 bar.className = 'histogram-bar';
-                bar.style.height = `${count * 20}px`; // Scale the height by count
-                bar.textContent = count;
-                histogramDiv.appendChild(bar);
+                bar.style.height = `${(count / max_occurrences) * 100}%`; // Scale the height by max occurrences
+                barContainer.appendChild(bar);
+                histogramDiv.appendChild(barContainer);
+            }
+        }
+
+        // Function to render axes
+        function renderAxes(min, max) {
+            const xAxis = document.getElementById('x-axis');
+            xAxis.innerHTML = ''; // Clear x-axis labels
+            for (let i = min; i <= max; i++) {
+                const xLabel = document.createElement('div');
+                xLabel.textContent = i;
+                xAxis.appendChild(xLabel);
             }
         }
 
@@ -108,9 +182,17 @@
         function resetHistogram() {
             counts = {};
             totalGenerated = 0;
+            max_occurrences = 0;
             document.getElementById('counter').textContent = `Generated numbers: 0`;
             document.getElementById('histogram').innerHTML = '';
+            document.getElementById('x-axis').innerHTML = '';
+            document.getElementById('y-axis').innerHTML = '';
         }
+
+        // Initialize the histogram with default min/max
+        window.onload = function() {
+            renderAxes(0, 5);
+        };
     </script>
 
 </body>
