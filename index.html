@@ -14,40 +14,14 @@
             margin: 5px;
             padding: 10px;
         }
-        #histogram-container {
-            margin-top: 30px;
-            display: flex;
-            justify-content: center;
+        .histogram-bar {
+            display: inline-block;
+            width: 20px;
+            background-color: orange;
+            margin: 2px;
         }
         #histogram {
-            width: 33.33vw;
-            height: calc(33.33vw * 0.8);
-            border: 1px solid black;
-            position: relative;
-            display: flex;
-            justify-content: space-around;
-            align-items: flex-end; /* Bars grow upwards */
-        }
-        .histogram-bar {
-            background-color: orange;
-            width: 20px;
-            margin: 2px;
-            display: inline-block;
-            vertical-align: bottom;
-        }
-        #x-axis {
-            display: flex;
-            justify-content: space-around;
-            margin-top: 10px;
-        }
-        #y-axis {
-            position: absolute;
-            left: -30px;
-            bottom: 0;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            height: 100%;
+            margin-top: 20px;
         }
         #counter {
             margin-top: 10px;
@@ -64,69 +38,25 @@
     <h1>Random Integer Generator with Histogram</h1>
     <p>Enter a range to generate a random number:</p>
 
-    <input type="number" id="min" placeholder="Min Value" value="0">
-    <input type="number" id="max" placeholder="Max Value" value="5">
+    <input type="number" id="min" placeholder="Min Value">
+    <input type="number" id="max" placeholder="Max Value">
     <button onclick="generateRandom()">Generate</button>
     <p id="result"></p>
 
     <div id="counter">Generated numbers: 0</div>
 
-    <div id="histogram-container">
-        <div id="histogram">
-            <div id="y-axis"></div>
-        </div>
-    </div>
-    <div id="x-axis"></div>
+    <div id="histogram"></div>
 
     <button onclick="resetHistogram()">Reset Histogram</button>
 
     <script>
         let counts = {};
         let totalGenerated = 0;
-        let max_occurrences = 0;
-        let currentMin = 0;
-        let currentMax = 5;
 
-        // Initialize histogram with default values for min and max (0 to 5)
-        function initializeHistogram(min, max) {
-            counts = {};
-            totalGenerated = 0;
-            max_occurrences = 0;
-            document.getElementById('counter').textContent = `Generated numbers: ${totalGenerated}`;
-
-            const xAxis = document.getElementById('x-axis');
-            const yAxis = document.getElementById('y-axis');
-            xAxis.innerHTML = ''; // Clear x-axis
-            yAxis.innerHTML = ''; // Clear y-axis
-
-            // Populate x-axis with bin labels for the range
-            for (let i = min; i <= max; i++) {
-                counts[i] = 0;
-                const xLabel = document.createElement('div');
-                xLabel.textContent = i;
-                xAxis.appendChild(xLabel);
-            }
-
-            // Set y-axis from 0 to max occurrences
-            for (let i = 0; i <= max_occurrences; i++) {
-                const yLabel = document.createElement('div');
-                yLabel.textContent = i;
-                yAxis.appendChild(yLabel);
-            }
-        }
-
-        // Function to generate a random number within the range
+        // Function to generate a random integer within the user-specified range
         function generateRandom() {
             const min = parseInt(document.getElementById('min').value);
             const max = parseInt(document.getElementById('max').value);
-
-            // If the range has changed, reset the histogram
-            if (min !== currentMin || max !== currentMax) {
-                currentMin = min;
-                currentMax = max;
-                resetHistogram();
-                initializeHistogram(min, max);
-            }
 
             if (!isNaN(min) && !isNaN(max) && min <= max) {
                 const randomInt = Math.floor(Math.random() * (max - min + 1)) + min;
@@ -142,52 +72,45 @@
             totalGenerated++;
             document.getElementById('counter').textContent = `Generated numbers: ${totalGenerated}`;
 
-            counts[randomInt]++;
-            if (counts[randomInt] > max_occurrences) {
-                max_occurrences = counts[randomInt];
+            // If the histogram needs resetting due to range change, reset
+            if (!counts.hasOwnProperty(randomInt) || Object.keys(counts).length === 0 || min !== counts.minRange || max !== counts.maxRange) {
+                resetHistogram();
+                counts.minRange = min;
+                counts.maxRange = max;
+
+                // Initialize count for each possible number in the range
+                for (let i = min; i <= max; i++) {
+                    counts[i] = 0;
+                }
             }
+
+            // Increment the count for the generated number
+            counts[randomInt]++;
             renderHistogram(min, max);
         }
 
-        // Render the histogram after each update
+        // Function to render the histogram
         function renderHistogram(min, max) {
             const histogramDiv = document.getElementById('histogram');
-            histogramDiv.innerHTML = ''; // Clear previous histogram bars
+            histogramDiv.innerHTML = ''; // Clear previous histogram
 
-            // Update y-axis (left) for the max occurrences
-            const yAxis = document.getElementById('y-axis');
-            yAxis.innerHTML = ''; // Clear y-axis
-            for (let i = 0; i <= max_occurrences; i++) {
-                const yLabel = document.createElement('div');
-                yLabel.textContent = i;
-                yAxis.appendChild(yLabel);
-            }
-
-            // Create histogram bars based on updated counts
             for (let i = min; i <= max; i++) {
-                const count = counts[i] || 0; // Get count, default to 0
+                const count = counts[i];
                 const bar = document.createElement('div');
                 bar.className = 'histogram-bar';
-                bar.style.height = `${(count / max_occurrences) * 100}%`; // Scale height relative to max occurrences
+                bar.style.height = `${count * 20}px`; // Scale the height by count
+                bar.textContent = count;
                 histogramDiv.appendChild(bar);
             }
         }
 
         // Function to reset the histogram and counter
         function resetHistogram() {
+            counts = {};
             totalGenerated = 0;
-            max_occurrences = 0;
             document.getElementById('counter').textContent = `Generated numbers: 0`;
-            const histogramDiv = document.getElementById('histogram');
-            histogramDiv.innerHTML = ''; // Clear histogram bars
-            document.getElementById('x-axis').innerHTML = ''; // Clear x-axis
-            document.getElementById('y-axis').innerHTML = ''; // Clear y-axis
+            document.getElementById('histogram').innerHTML = '';
         }
-
-        // Initialize default histogram for range 0-5 on page load
-        window.onload = function() {
-            initializeHistogram(0, 5);
-        };
     </script>
 
 </body>
