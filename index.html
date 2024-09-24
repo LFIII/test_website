@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Random Integer Generator with Histogram 2</title>
+    <title>Random Integer Generator with Histogram</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -72,7 +72,7 @@
 </head>
 <body>
 
-    <h1>Random Integer Generator with Histogram2</h1>
+    <h1>Random Integer Generator with Histogram</h1>
     <p>Enter a range to generate a random number:</p>
 
     <input type="number" id="min" placeholder="Min Value" value="0">
@@ -97,11 +97,20 @@
         let counts = {};
         let totalGenerated = 0;
         let max_occurrences = 0;
+        let currentMin = 0;
+        let currentMax = 5;
 
         // Function to generate a random integer within the user-specified range
         function generateRandom() {
             const min = parseInt(document.getElementById('min').value);
             const max = parseInt(document.getElementById('max').value);
+
+            // Check if range changed, reset histogram if so
+            if (min !== currentMin || max !== currentMax) {
+                resetHistogram();
+                currentMin = min;
+                currentMax = max;
+            }
 
             if (!isNaN(min) && !isNaN(max) && min <= max) {
                 const randomInt = Math.floor(Math.random() * (max - min + 1)) + min;
@@ -117,15 +126,12 @@
             totalGenerated++;
             document.getElementById('counter').textContent = `Generated numbers: ${totalGenerated}`;
 
-            // If the histogram needs resetting due to range change, reset
-            if (!counts.hasOwnProperty(randomInt) || Object.keys(counts).length === 0 || min !== counts.minRange || max !== counts.maxRange) {
-                resetHistogram();
-                counts.minRange = min;
-                counts.maxRange = max;
-
-                // Initialize count for each possible number in the range
+            // Initialize count for each possible number in the range if not already initialized
+            if (!counts.hasOwnProperty(randomInt)) {
                 for (let i = min; i <= max; i++) {
-                    counts[i] = 0;
+                    if (!counts[i]) {
+                        counts[i] = 0;
+                    }
                 }
                 renderAxes(min, max);
             }
@@ -144,8 +150,6 @@
             histogramDiv.innerHTML = ''; // Clear previous histogram
 
             // Render the y-axis
-            const yAxis = document.createElement('div');
-            yAxis.classList.add('y-axis');
             const yLabels = document.getElementById('y-axis');
             yLabels.innerHTML = ''; // Clear y-axis labels
             for (let i = 0; i <= max_occurrences; i++) {
@@ -156,7 +160,7 @@
 
             // Render histogram bars
             for (let i = min; i <= max; i++) {
-                const count = counts[i];
+                const count = counts[i] || 0; // If there's no count for a number, default to 0
                 const barContainer = document.createElement('div');
                 barContainer.classList.add('histogram-bar-container');
                 const bar = document.createElement('div');
@@ -181,8 +185,8 @@
         // Function to reset the histogram and counter
         function resetHistogram() {
             counts = {};
-           // totalGenerated = 0;
             max_occurrences = 0;
+            totalGenerated = 0;
             document.getElementById('counter').textContent = `Generated numbers: 0`;
             document.getElementById('histogram').innerHTML = '';
             document.getElementById('x-axis').innerHTML = '';
