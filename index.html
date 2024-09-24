@@ -30,7 +30,7 @@
             const max = parseInt(document.getElementById('max').value);
             if (!isNaN(min) && !isNaN(max) && min <= max) {
                 const randomInt = Math.floor(Math.random() * (max - min + 1)) + min;
-                document.getElementById('result').textContent = `Random Number: ${randomInt}`;
+                document.getElementById('result').textContent = `${randomInt}`;
             } else {
                 document.getElementById('result').textContent = "Please enter valid numbers.";
             }
