@@ -3,38 +3,115 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Random Integer Generator</title>
+    <title>Random Integer Generator with Histogram</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             text-align: center;
-            margin-top: 50px;
+            margin-top: 20px;
         }
         input, button {
             margin: 5px;
             padding: 10px;
         }
+        .histogram-bar {
+            display: inline-block;
+            width: 20px;
+            background-color: orange;
+            margin: 2px;
+        }
+        #histogram {
+            margin-top: 20px;
+        }
+        #counter {
+            margin-top: 10px;
+            font-size: 18px;
+            color: #333;
+        }
+        button {
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
-    <h1>Random Integer Generator</h1>
+
+    <h1>Random Integer Generator with Histogram</h1>
     <p>Enter a range to generate a random number:</p>
+
     <input type="number" id="min" placeholder="Min Value">
     <input type="number" id="max" placeholder="Max Value">
     <button onclick="generateRandom()">Generate</button>
     <p id="result"></p>
 
+    <div id="counter">Generated numbers: 0</div>
+
+    <div id="histogram"></div>
+
+    <button onclick="resetHistogram()">Reset Histogram</button>
+
     <script>
+        let counts = {};
+        let totalGenerated = 0;
+
+        // Function to generate a random integer within the user-specified range
         function generateRandom() {
             const min = parseInt(document.getElementById('min').value);
             const max = parseInt(document.getElementById('max').value);
+
             if (!isNaN(min) && !isNaN(max) && min <= max) {
                 const randomInt = Math.floor(Math.random() * (max - min + 1)) + min;
-                document.getElementById('result').textContent = `RANDOM NUMBER: ${randomInt}`;
+                document.getElementById('result').textContent = `Random Number: ${randomInt}`;
+                updateHistogram(randomInt, min, max);
             } else {
                 document.getElementById('result').textContent = "Please enter valid numbers.";
             }
         }
+
+        // Function to update the histogram
+        function updateHistogram(randomInt, min, max) {
+            totalGenerated++;
+            document.getElementById('counter').textContent = `Generated numbers: ${totalGenerated}`;
+
+            // If the histogram needs resetting due to range change, reset
+            if (!counts.hasOwnProperty(randomInt) || Object.keys(counts).length === 0 || min !== counts.minRange || max !== counts.maxRange) {
+                resetHistogram();
+                counts.minRange = min;
+                counts.maxRange = max;
+
+                // Initialize count for each possible number in the range
+                for (let i = min; i <= max; i++) {
+                    counts[i] = 0;
+                }
+            }
+
+            // Increment the count for the generated number
+            counts[randomInt]++;
+            renderHistogram(min, max);
+        }
+
+        // Function to render the histogram
+        function renderHistogram(min, max) {
+            const histogramDiv = document.getElementById('histogram');
+            histogramDiv.innerHTML = ''; // Clear previous histogram
+
+            for (let i = min; i <= max; i++) {
+                const count = counts[i];
+                const bar = document.createElement('div');
+                bar.className = 'histogram-bar';
+                bar.style.height = `${count * 20}px`; // Scale the height by count
+                bar.textContent = count;
+                histogramDiv.appendChild(bar);
+            }
+        }
+
+        // Function to reset the histogram and counter
+        function resetHistogram() {
+            counts = {};
+            totalGenerated = 0;
+            document.getElementById('counter').textContent = `Generated numbers: 0`;
+            document.getElementById('histogram').innerHTML = '';
+        }
     </script>
+
 </body>
 </html>
