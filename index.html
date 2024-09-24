@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Random Integer Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+        input, button {
+            margin: 5px;
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Random Integer Generator</h1>
+    <p>Enter a range to generate a random number:</p>
+    <input type="number" id="min" placeholder="Min Value">
+    <input type="number" id="max" placeholder="Max Value">
+    <button onclick="generateRandom()">Generate</button>
+    <p id="result"></p>
+
+    <script>
+        function generateRandom() {
+            const min = parseInt(document.getElementById('min').value);
+            const max = parseInt(document.getElementById('max').value);
+            if (!isNaN(min) && !isNaN(max) && min <= max) {
+                const randomInt = Math.floor(Math.random() * (max - min + 1)) + min;
+                document.getElementById('result').textContent = `Random Number: ${randomInt}`;
+            } else {
+                document.getElementById('result').textContent = "Please enter valid numbers.";
+            }
+        }
+    </script>
+</body>
+</html>
